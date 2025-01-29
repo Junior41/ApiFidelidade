@@ -10,17 +10,17 @@ Execute os comandos dentro da pasta backend, após criar seu .env:
 
 # Endpoints
 
-- ## client (/api/v1/client)
-  - ### /api/v1/client - POST<br/>
+- ## clients (/api/v1/client)
+  - ### /api/v1/clients - POST<br/>
     Cadastra um cliente.<br/>
     Parâmetros:
     - name (String, obrigatório);
     - email (string, obrigatório).
-  - ### /api/v1/client - GET<br/>
+  - ### /api/v1/clients - GET<br/>
     Lista todos os clientes.
-  - ### /api/v1/client/{id} - GET<br/>
+  - ### /api/v1/clients/{id} - GET<br/>
     Lista um cliente em espécifico pelo id.
-  - ### /api/v1/client/{id}/rewards - GET<br/>
+  - ### /api/v1/clients/{id}/rewards - GET<br/>
     Lista todas as recompensas resgatadas por um determinado cliente.
 
 - ## transactions (/api/v1/transaction)
@@ -30,4 +30,11 @@ Execute os comandos dentro da pasta backend, após criar seu .env:
     Parâmetros:
     - value (Double, obrigatório, maior que 0);
     - clienteId (int, obrigatório).
+   
+- ## exchange (/api/v1/exchange)
+  - ### /api/v1/exchange - POST<br/>
+    Registar a troca de pontos do cliente por um prêmio, caso o cliente tenha pontos suficientes.<br/>
+    Parâmetros:
+    - clientId (int, obrigatório);
+    - rewardId (int, obrigatório).
 
