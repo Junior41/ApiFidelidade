@@ -1,6 +1,6 @@
 # Resumo
 
-Api desenvolvida em php com o framework laravel que simula um sistema de recompensas onde a cada 5 reais gastos o cliente ganha 1 ponto, esses pontos podem ser trocados por recompensas. Sempre que o cliente ganha um ponto ou faz uma troca de pontos por recompensas, ele recebe um email. A arquitetura foi pensada de modo a garantir eficiência e escalabilidade. Para isso, foi utilizado laravel jobs e técnicas de código limpo.
+Api desenvolvida em php com o framework laravel que simula um sistema de recompensas onde a cada 5 reais gastos o cliente ganha 1 ponto, esses pontos podem ser trocados por recompensas. Sempre que o cliente ganha um ponto ou faz uma troca de pontos por recompensas, ele recebe um email. A arquitetura foi pensada de modo a garantir eficiência e escalabilidade. Para isso, foi utilizado laravel jobs, docker (com sail) e técnicas de código limpo.
 
 A api permite:
  - Cadastro de um cliente;
