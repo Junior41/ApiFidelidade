@@ -21,7 +21,7 @@ class ClientsController extends Controller
      */
     public function index():JsonResponse
     {
-        $clients = Client::with('exchange.reward')->get();
+        $clients = Client::with('exchange.reward')->paginate(10);
 
         return $this->success("Successful listing", 200, ClientResource::collection($clients));
        
