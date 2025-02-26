@@ -89,7 +89,7 @@ class ClientsController extends Controller
 
         $updated = $client->delete();
 
-        return $this->success("Client excluded", 200, new ClientResource($client));
+        return $this->success("Client excluded", 204, []);
         
     }
 
