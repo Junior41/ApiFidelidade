@@ -152,6 +152,17 @@ class ClientsControllerTest extends TestCase
             ]);
     }
 
+    public function testShowRewardsForMissingClient(){
+        $this->json('get', 'api/v1/clients/-1/rewards')
+            ->assertStatus(Response::HTTP_NOT_FOUND)
+            ->assertExactJson([
+                'message' => "Client not found",
+                'status' => 404,
+                'errors' => [],
+                'data' => []
+            ]);
+    }
+
     public function testClientIsDestroyed(){
         $clientData = [
             "name" => $this->faker->name,
