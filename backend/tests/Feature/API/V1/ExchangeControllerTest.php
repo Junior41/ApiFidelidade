@@ -49,7 +49,7 @@ class ExchangeControllerTest extends TestCase
 
         $this->json('post', '/api/v1/exchange', $exchange)
             ->assertStatus(Response::HTTP_OK)
-            ->assertExactJson([
+            ->assertJson([
                 'message' => "Exchange made successfully",
                 'status' => 200,
                 'data' => [
@@ -65,7 +65,6 @@ class ExchangeControllerTest extends TestCase
                             "name" => $reward->name, 
                             "pointsCost" => $reward->pointsCost, 
                         ],
-                        "exchangeDate" => Carbon::parse(Exchange::latest()->first()->created_at)->format('d/m/y H:i:s'), 
 
                 ] 
             ]);

@@ -17,73 +17,47 @@ class TransactionsControllerTest extends TestCase
 {
     use WithFaker;
 
-    public function testExchangeCreatedSuccessfully(){
+    public function testTransactionCreatedSuccessfully(){
         $client = Client::create([
             'name' => $this->faker->firstName,
             'email' => $this->faker->email
         ]);
 
-        $reward = Reward::create([
-            'name' => $this->faker->name, 
-            'pointsCost' => $this->faker->randomDigitNotNull
-        ]);
-
-        $this->transactionService->createTransaction([
-            "value" => $reward->pointsCost * 5,
+        $transaction = [
             'clientId' => $client->id,
-        ]);
-
-        $exchange = [
-            'clientId' => $client->id,
-            'rewardId' => $reward->id
+            'value' => 10
         ];
 
-        $this->json('post', '/api/v1/exchange', $exchange)
+        $this->json('post', '/api/v1/transactions', $transaction)
             ->assertStatus(Response::HTTP_OK)
-            ->assertExactJson([
-                'message' => "Exchange made successfully",
+            ->assertJson([
+                'message' => "Transaction registered successfully",
                 'status' => 200,
                 'data' => [
-                        'client' => [
-                            'id' => $client->id,
-                            'name' => $client->name,
-                            'email' => $client->email,
-                            'balance' => 'R$' . number_format($client->balance, 2, ',', '.'),
-                            'points' => $client->balance >= 5 ? intdiv($client->balance, 5) : 0,
-                        ],
-                        'reward' => [ 
-                            "id" => $reward->id, 
-                            "name" => $reward->name, 
-                            "pointsCost" => $reward->pointsCost, 
-                        ],
-                        "exchangeDate" => Carbon::parse(Exchange::latest()->first()->created_at)->format('d/m/y H:i:s'), 
-
+                    'client' => [
+                        'id' => $client->id,
+                        'name' => $client->name,
+                        'email' => $client->email,
+                        'balance' => 'R$' . number_format($transaction['value'], 2, ',', '.'),
+                        'points' => $transaction['value'] >= 5 ? intdiv($transaction['value'], 5) : 0,
+                    ],
+                    "value" => 'R$' . number_format($transaction['value'], 2, ',', '.'),
                 ] 
             ]);
     }
 
-    public function testMakeExchangeWithInvalidClient(){
+    public function testRegisterTransactionWithInvalidClient(){
         $client = Client::create([
             'name' => $this->faker->firstName,
             'email' => $this->faker->email
         ]);
 
-        $reward = Reward::create([
-            'name' => $this->faker->name, 
-            'pointsCost' => $this->faker->randomDigitNotNull
-        ]);
-
-        $this->transactionService->createTransaction([
-            "value" => $reward->pointsCost * 5,
-            'clientId' => $client->id,
-        ]);
-
-        $exchange = [
+        $transaction = [
+            "value" => 0,
             'clientId' => $client->id + 1,
-            'rewardId' => $reward->id
         ];
 
-        $this->json('post', '/api/v1/exchange', $exchange)
+        $this->json('post', '/api/v1/transactions', $transaction)
             ->assertStatus(404)
             ->assertExactJson([
                 'message' => "Client not found",
@@ -93,71 +67,56 @@ class TransactionsControllerTest extends TestCase
             ]);
     }
 
-    public function testMakeExchangeWithInvalidReward(){
+    public function testRegisterTransactionWithInvalidValue(){
         $client = Client::create([
             'name' => $this->faker->firstName,
             'email' => $this->faker->email
         ]);
 
-        $reward = Reward::create([
-            'name' => $this->faker->name, 
-            'pointsCost' => $this->faker->randomDigitNotNull
-        ]);
-
-        $this->transactionService->createTransaction([
-            "value" => $reward->pointsCost * 5,
+        $transaction = [
+            "value" => 'abc',
             'clientId' => $client->id,
-        ]);
-
-        $exchange = [
-            'clientId' => $client->id,
-            'rewardId' => $reward->id + 1
         ];
 
-        $this->json('post', '/api/v1/exchange', $exchange)
-            ->assertStatus(404)
-            ->assertExactJson([
-                'message' => "Reward not found",
-                'status' => 404,
-                'errors' => [],
-                'data' => []
-            ]);
-    }
-
-    public function testMakeExchangeWithInsufficientBalance(){
-        $client = Client::create([
-            'name' => $this->faker->firstName,
-            'email' => $this->faker->email
-        ]);
-
-        $reward = Reward::create([
-            'name' => $this->faker->name, 
-            'pointsCost' => $this->faker->randomDigitNotNull
-        ]);
-
-        $exchange = [
-            'clientId' => $client->id,
-            'rewardId' => $reward->id
-        ];
-
-        $this->json('post', '/api/v1/exchange', $exchange)
-            ->assertStatus(400)
-            ->assertExactJson([
-                'message' => "Insufficient balance for exchange",
-                'status' => 400,
-                'errors' => [],
-                'data' => []
-            ]);
-    }
-
-    public function testExchangeRegistrationWithoutRequiredParams(){
-
-        $this->json('post', '/api/v1/exchange', [])
+        $this->json('post', '/api/v1/transactions', $transaction)
             ->assertStatus(422)
             ->assertExactJson([
                 'message' => "Validation failed.",
                 'status' => 422,
-                'errors' => ['The clientId attribute is required.', 'The rewardId attribute is required.'],
+                'errors' => ['The value must be a number'],
+                'data' => []
+            ]);
+    }
+
+    public function testRegisterTransactionWithWithValueLessThanZero(){
+        $client = Client::create([
+            'name' => $this->faker->firstName,
+            'email' => $this->faker->email
+        ]);
+
+        $transaction = [
+            "value" => -1,
+            'clientId' => $client->id,
+        ];
+
+        $this->json('post', '/api/v1/transactions', $transaction)
+            ->assertStatus(422)
+            ->assertExactJson([
+                'message' => "Validation failed.",
+                'status' => 422,
+                'errors' => ["Transaction amount must be greater than 0"],
+                'data' => []
+            ]);
+    }
+
+    public function testRegisterTransactionWithoutRequiredParams(){
+
+        $this->json('post', '/api/v1/transactions', [])
+            ->assertStatus(422)
+            ->assertExactJson([
+                'message' => "Validation failed.",
+                'status' => 422,
+                'errors' => ['The value attribute is required.', 'The clientId attribute is required.'],
                 'data' => [] 
             ]);
     }
